@@ -117,7 +117,6 @@ async def chat(request: ChatRequest):
             model=model,
             max_tokens=4096,
             system=system_prompt,
-            thinking={"type": "adaptive"},
             messages=history_messages,
         )
 
@@ -161,7 +160,6 @@ async def _stream_chat(model: str, system_prompt: str, messages: list):
             model=model,
             max_tokens=4096,
             system=system_prompt,
-            thinking={"type": "adaptive"},
             messages=messages,
         ) as stream:
             async for text in stream.text_stream:
