@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Deathcon AI",
+    "slug": "deathcon-ai",
+    "version": "1.0.0",
+    "scheme": "deathcon",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0A0A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.deathcon.ai",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used for profile photos",
+        "NSMicrophoneUsageDescription": "Used for voice messages"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0A"
+      },
+      "package": "com.deathcon.ai"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
