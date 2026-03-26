@@ -24,7 +24,7 @@ cd deathcon-api
 pip install -r requirements.txt
 
 # Copy and configure env file
-cp .env.example .env
+cp env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
 
 # Run server
