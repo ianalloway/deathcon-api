@@ -3,12 +3,11 @@ Deathcon API - AI Wrapper + Webhook Handler
 Built by Deathconbot ⚰️
 """
 
-from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
-import json
 import logging
 from datetime import datetime
 from anthropic import Anthropic

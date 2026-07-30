@@ -8,3 +8,7 @@
 !env.example
 *.pem
 *.key
+
+.venv/
+__pycache__/
+*.egg-info/
