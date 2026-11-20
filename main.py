@@ -3,7 +3,9 @@ Deathcon API - AI Wrapper + Webhook Handler
 Built by Deathconbot ⚰️
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from secrets import compare_digest
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -27,8 +29,26 @@ app.add_middleware(
     allow_origins=cors_origins,
     allow_credentials=allow_credentials,
     allow_methods=["GET", "POST", "DELETE"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+bearer = HTTPBearer(auto_error=False)
+
+
+def require_token(setting):
+    def authorize(credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer)):
+        expected = os.getenv(setting)
+        if not expected:
+            raise HTTPException(status_code=503, detail="Access token is not configured")
+        if credentials is None or not compare_digest(credentials.credentials.encode(), expected.encode()):
+            raise HTTPException(status_code=401, detail="Invalid access token",
+                                headers={"WWW-Authenticate": "Bearer"})
+
+    return Depends(authorize)
+
+
+operator_access = require_token("DEATHCON_OPERATOR_TOKEN")
+webhook_access = require_token("DEATHCON_WEBHOOK_TOKEN")
 
 # Models
 class ChatRequest(BaseModel):
@@ -74,7 +94,7 @@ def root():
 def health():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-@app.post("/chat")
+@app.post("/chat", dependencies=[operator_access])
 async def chat(request: ChatRequest):
     """AI Chat endpoint - wraps Claude"""
     try:
@@ -138,12 +158,12 @@ async def chat(request: ChatRequest):
             detail="Failed to process chat request"
         )
 
-@app.get("/history")
+@app.get("/history", dependencies=[operator_access])
 def get_history():
     """Get chat history"""
     return {"history": chat_history}
 
-@app.post("/webhook")
+@app.post("/webhook", dependencies=[webhook_access])
 async def handle_webhook(payload: WebhookPayload, background_tasks: BackgroundTasks):
     """Handle incoming webhooks"""
     try:
@@ -186,12 +206,12 @@ async def handle_webhook(payload: WebhookPayload, background_tasks: BackgroundTa
             detail="Failed to process webhook"
         )
 
-@app.get("/logs")
+@app.get("/logs", dependencies=[operator_access])
 def get_logs():
     """Get webhook logs"""
     return {"logs": webhook_logs}
 
-@app.delete("/history")
+@app.delete("/history", dependencies=[operator_access])
 def clear_history():
     """Clear chat history"""
     chat_history.clear()
