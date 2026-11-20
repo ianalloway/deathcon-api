@@ -9,5 +9,9 @@ services:
         value: "3.11"
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: DEATHCON_OPERATOR_TOKEN
+        sync: false
+      - key: DEATHCON_WEBHOOK_TOKEN
+        sync: false
       - key: CORS_ORIGINS
         value: "*"

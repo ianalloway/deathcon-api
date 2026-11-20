@@ -25,12 +25,12 @@ pip install -r requirements.txt
 
 # Copy and configure env file
 cp env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Edit .env to set your Anthropic key and both Deathcon access tokens
 
 # Run server
-uvicorn main:app --reload --port 8000
+uvicorn main:app --env-file .env --reload --port 8000
 
-# Or use Python directly
+# Or export the same variables in the shell and use Python directly
 python main.py
 ```
 
@@ -39,8 +39,12 @@ python main.py
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ANTHROPIC_API_KEY` | Your Anthropic API key | Required |
+| `DEATHCON_OPERATOR_TOKEN` | Bearer credential for the single operator’s shared chat, history and logs | Required for operator routes |
+| `DEATHCON_WEBHOOK_TOKEN` | Separate bearer credential for submitting webhook events | Required for webhook ingestion |
 | `CORS_ORIGINS` | Comma-separated CORS origins | `*` |
 | `CORS_ALLOW_CREDENTIALS` | Allow credentials in CORS | `false` |
+
+Use two different random tokens. Keep the operator credential with the single trusted operator. A webhook relay can attach the ingestion credential when forwarding events. Public health and discovery endpoints require no credentials.
 
 ## API Endpoints
 
@@ -206,7 +210,7 @@ Retrieve webhook processing logs (limited to last 100 logs).
 ### Chat with Claude
 
 ```bash
-curl -X POST http://localhost:8000/chat \
+curl -H "Authorization: Bearer $DEATHCON_OPERATOR_TOKEN" -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Explain quantum computing in simple terms",
@@ -217,7 +221,7 @@ curl -X POST http://localhost:8000/chat \
 ### Process GitHub Webhook
 
 ```bash
-curl -X POST http://localhost:8000/webhook \
+curl -H "Authorization: Bearer $DEATHCON_WEBHOOK_TOKEN" -X POST http://localhost:8000/webhook \
   -H "Content-Type: application/json" \
   -d '{
     "source": "github",
@@ -234,13 +238,13 @@ curl -X POST http://localhost:8000/webhook \
 ### Check History
 
 ```bash
-curl http://localhost:8000/history
+curl -H "Authorization: Bearer $DEATHCON_OPERATOR_TOKEN" http://localhost:8000/history
 ```
 
 ### Check Logs
 
 ```bash
-curl http://localhost:8000/logs
+curl -H "Authorization: Bearer $DEATHCON_OPERATOR_TOKEN" http://localhost:8000/logs
 ```
 
 ## Deployment
@@ -263,7 +267,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 1. Connect your GitHub repository
 2. Create a new Web Service
 3. Use Python environment
-4. Set `ANTHROPIC_API_KEY` in environment variables
+4. Set `ANTHROPIC_API_KEY`, `DEATHCON_OPERATOR_TOKEN` and `DEATHCON_WEBHOOK_TOKEN` in environment variables.
 5. Build command: `pip install -r requirements.txt`
 6. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 
